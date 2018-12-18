@@ -12,8 +12,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import org.glassfish.jersey.server.ManagedAsync;
 
 /**
  *
@@ -54,6 +57,8 @@ public class BookResource {
         return bookDAO.getBook(id);
     }
     
+    /*
+    //Whithout Asynchronous Capabilities
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -63,8 +68,17 @@ public class BookResource {
         //totalmente pelo Jersey. Não temos que nos preocupar com isso.
         return bookDAO.addBook(book);
     }
+    */
     
     
-    
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ManagedAsync
+    public void addBook(Book book, @Suspended AsyncResponse response){
+        //A Serialização e Deserialização do objeto recebido e retornado é feita 
+        //totalmente pelo Jersey. Não temos que nos preocupar com isso.
+        response.resume(bookDAO.addBook(book));
+    }
     
 }
