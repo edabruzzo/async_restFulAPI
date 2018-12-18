@@ -16,6 +16,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -53,7 +54,7 @@ public class BookResourceTest extends JerseyTest{
      @Test
      public void testGetBook(){
          
-        Book response = target("books").path("1").request().get(Book.class);
+        Book response = target("books").path(book1_id).request().get(Book.class);
         /*
         BookDAO bookDAO = new BookDAO();
         boolean test = bookDAO.getBook("1").equals(response);
@@ -91,23 +92,43 @@ public class BookResourceTest extends JerseyTest{
          return target("/books").request().post(bookEntity);
      }
      
-     
-     
+     String book1_id;
+     String book2_id;
+     //Adiciona método para ser executado antes dos testes
+     @Before
+     public void setUpBooks(){
+         
+         
+         book1_id = this.addBook("xxxxxxx", "xxxxxxx", "xxxxxxx", new Date())
+                         .readEntity(Book.class)
+                         .getId();
+         
+         book2_id = this.addBook("AAAAAA", "AAAAAA", "AAAAAAAA", new Date())
+                         .readEntity(Book.class)
+                         .getId();
+         
+     }
      
      
      
      @Test
      public void testAddBook(){
          
-        Response response = this.addBook("SSSSSS", "SSSSSSS", "SSSSSS", new Date());
+        Date thisDate = new Date(); 
+        String autor = "SSSSSSS";
+        String titulo = "SSSSSS";
+        String isbn = "ssssssssss";
+        Response response = this.addBook(titulo, autor, isbn, thisDate);
         
         assertEquals(200, response.getStatus());
         
         //Desserializa a entidade para um objeto do tipo livro
         Book responseBook = response.readEntity(Book.class);
         assertNotNull(responseBook.getId());
-        assertNotNull(responseBook.getAuthor());
-        assertNotNull(responseBook.getTitle());
+        assertEquals(autor, responseBook.getAuthor());
+        assertEquals(titulo, responseBook.getTitle());
+        assertEquals(isbn, responseBook.getIsbn());
+        assertEquals(thisDate, responseBook.getPublished());
         
      }
     
