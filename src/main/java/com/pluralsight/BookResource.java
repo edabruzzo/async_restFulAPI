@@ -5,6 +5,9 @@
  */
 package com.pluralsight;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -75,10 +78,26 @@ public class BookResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ManagedAsync
-    public void addBook(Book book, @Suspended AsyncResponse response){
+    public void addBook(Book book, @Suspended final AsyncResponse response){
         //A Serialização e Deserialização do objeto recebido e retornado é feita 
         //totalmente pelo Jersey. Não temos que nos preocupar com isso.
-        response.resume(bookDAO.addBook(book));
+        //response.resume(bookDAO.addBook(book));
+        ListenableFuture<Book> bookFuture = bookDAO.addBookAsync(book);
+        
+        //Futures.addCallback(bookFuture, new 
+          Futures.addCallback(bookFuture, new FutureCallback<Book>(){
+              
+                       //implementar os métodos da interface
+              public void onSuccess(Book addedBook){
+                  response.resume(addedBook);
+              }
+              public void onFailure(Throwable thrown){
+                  response.resume(thrown);
+              }
+          });
+            
+    
+    
     }
     
 }
